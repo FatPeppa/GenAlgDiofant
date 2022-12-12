@@ -22,8 +22,8 @@ struct gene {
 
 class Diophantine {
 public:
-	
 	Diophantine(int a, int b, int c, int d, int res) : ca(a), cb(b), cc(c), cd(d), result(res){}; //коструктор со значениями a, b, c, d и result
+
 	int Solve() {
 		int fitness = -1;
 		srand((unsigned)time(NULL));
@@ -102,8 +102,6 @@ protected:
 		return sum;
 	};// мультипликативная инверсия
 
-
-
 	void CreateNewPopulation() {
 		gene temp_pop[max_pop];
 
@@ -162,8 +160,8 @@ protected:
 int main()
 {
 	Diophantine diop(1, 2, 3, 4, 30);
-
 	int ans;
+
 	for (int i = 0; i < 10; i++)
 	{
 		ans = diop.Solve();
@@ -179,5 +177,4 @@ int main()
 			break;
 		}
 	}
-	
 }
