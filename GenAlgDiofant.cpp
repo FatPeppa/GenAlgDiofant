@@ -4,14 +4,14 @@
 
 using namespace std;
 
-const int max_pop = 25;
+const int max_pop = 200;
 
 struct gene {
-    int chromosomes[4], fitness;
+    int chromosomes[7], fitness;
     float likelihood;
 
 	bool checkEquality(gene gn) {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 7; i++) {
 			if (gn.chromosomes[i] != chromosomes[i]) 
 				return false;
 		}
@@ -22,7 +22,7 @@ struct gene {
 
 class Diophantine {
 public:
-	Diophantine(int a, int b, int c, int d, int res) : ca(a), cb(b), cc(c), cd(d), result(res){}; //коструктор со значениями a, b, c, d и result
+	Diophantine(int a, int b, int c, int d, int e, int f, int g, int res) : ca(a), cb(b), cc(c), cd(d), ce(e), cf(f), cg(g), result(res) {};
 
 	int Solve() {
 		int fitness = -1;
@@ -30,7 +30,7 @@ public:
 
 		//генерация первого поколения
 		for (int i = 0; i < max_pop; i++) {
-			for (int j = 0; j < 4; j++) {
+			for (int j = 0; j < 7; j++) {
 				population[i].chromosomes[j] = rand() % (result + 1);
 			}
 		}
@@ -60,14 +60,16 @@ public:
 	}
 
 protected:
-	int ca, cb, cc, cd;// Коэффиценты
+	int ca, cb, cc, cd, ce, cf, cg;// Коэффиценты
 	int result;
 	gene population[max_pop]; // Пупуляция
 
 	int Fitness(gene& gn) {
-		int total = ca * gn.chromosomes[0] + cb * gn.chromosomes[1] + cc * gn.chromosomes[2] + cd * gn.chromosomes[3];
+		int total = total = ca * gn.chromosomes[0] + cb * gn.chromosomes[1] + cc * gn.chromosomes[2] + cd * gn.chromosomes[3] +
+			ce * gn.chromosomes[4] + cf * gn.chromosomes[5] + cg * gn.chromosomes[6];
+
 		return gn.fitness = abs(total - result);
-	};// Функция вычисления fitness
+	}// Функция вычисления fitness
 
 	int CreateFitnesses() {
 		float averagefit = 0;
@@ -108,15 +110,20 @@ protected:
 		for (int i = 0; i < max_pop; i++) {
 			int parent1 = 0, parent2 = 0, iterations = 0;
 
-			while (parent1 == parent2 || population[parent1].checkEquality(population[parent2])) {
-				parent1 = GetIndex((float)(rand() % 101));
-				parent2 = GetIndex((float)(rand() % 101));
-
-				if (++iterations > 25)
-					break;
+			if (rand() % 100 < 8) {
+				temp_pop[i] = mutation(population[GetIndex((float)i)]); //мутация данного гена с вероятность 0.08
 			}
+			else {
+				while (parent1 == parent2 || population[parent1].checkEquality(population[parent2])) {
+					parent1 = GetIndex((float)(rand() % 101));
+					parent2 = GetIndex((float)(rand() % 101));
 
-			temp_pop[i] = Breed(parent1, parent2);//Создание потомка(размножение)
+					if (++iterations > 25)
+						break;
+				}
+
+				temp_pop[i] = Breed(parent1, parent2);//Создание потомка(размножение)
+			}
 		}
 
 		for (int i = 0; i < max_pop; i++)
@@ -132,24 +139,28 @@ protected:
 				last = population[i].likelihood;
 		}
 
-		return 4;
-	}; //Поиск гена в популяции по его значению
+		return 7;
+	}; // Поиск гена в популяции по его значению
 
+	gene mutation(gene& gn) {
+		gn.chromosomes[gn.chromosomes[rand() % 7]] = rand() % 100 + 1;
+		return gn;
+	} // Функция мутации гена
 
 	gene Breed(int parent1, int parent2) {
-		int crossover = rand() % 3 + 1;// Случайный выбор точки-разделителя
+		int crossover = rand() % 6 + 1;// Случайный выбор точки-разделителя
 		int first = rand() % 100;// Выбор первого родителя
 
 		gene child = population[parent1]; // Взятие генов от первого родителя
 
-		int initial = 0, final = 3;// Границы кроссовера
+		int initial = 0, final = 6;// Границы кроссовера
 		if (first < 50)
 			initial = crossover;	// Определение принадлежности первой и второй частей потомка первому или второму родителю
 		else final = crossover + 1;
 
 		for (int i = initial; i < final; i++) {// Скрещивание
 			child.chromosomes[i] = population[parent2].chromosomes[i];
-			if (rand() % 101 < 5)
+			if (rand() % 101 < 8)
 				child.chromosomes[i] = rand() % (result + 1);
 		}
 
@@ -159,21 +170,23 @@ protected:
 
 int main()
 {
-	Diophantine diop(1, 2, 3, 4, 30);
+	Diophantine diop(1, 2, 3, 4, 5, 6, 7, 60);
 	int ans;
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		ans = diop.Solve();
 
-		if (ans == -1 && i == 9) {
+		if (i == 99) {
 			cout << "There is no solution founded. " << endl;
+			break;
 		}
-		else {
+		else if (ans != -1) {
 			gene gn = diop.GetGene(ans);
-			cout << "The soultion for a + 2b + 3c + 4d = 30 is:\n " << "a= " << gn.chromosomes[0] << ".\n" <<
+			cout << "The solution for a + 2b + 3c + 4d + 5e + 6f + 7g = 60 is:\n " << "a= " << gn.chromosomes[0] << ".\n" <<
 				"b= " << gn.chromosomes[1] << ".\n" << "c= " << gn.chromosomes[2] << ".\n" <<
-				"d= " << gn.chromosomes[3] << "." << endl;
+				"d= " << gn.chromosomes[3] << ".\n" << "e= " << gn.chromosomes[4]
+				<< ".\n" << "f= " << gn.chromosomes[5] << ".\n" << "g= " << gn.chromosomes[6] << "." << endl;
 			break;
 		}
 	}
