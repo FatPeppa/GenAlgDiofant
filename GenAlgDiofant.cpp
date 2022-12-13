@@ -62,7 +62,18 @@ public:
 protected:
 	int ca, cb, cc, cd, ce, cf, cg;// Коэффиценты
 	int result;
-	gene population[max_pop]; // Пупуляция
+	float avgFitness;
+	float lastAvgFitness;
+	gene population[max_pop]; // Популяция
+
+	float AvgFitness(gene pop[max_pop]) {
+		float totalF = 0;
+		for (int i = 0; i < max_pop; i++)
+		{
+			totalF += pop[GetIndex((float)i)].fitness;
+		}
+		return avgFitness = (totalF / max_pop + 1);
+	}
 
 	int Fitness(gene& gn) {
 		int total = total = ca * gn.chromosomes[0] + cb * gn.chromosomes[1] + cc * gn.chromosomes[2] + cd * gn.chromosomes[3] +
@@ -72,11 +83,11 @@ protected:
 	}// Функция вычисления fitness
 
 	int CreateFitnesses() {
-		float averagefit = 0;
+		//float averagefit = 0;
 		int fitness = 0;
 		for (int i = 0; i < max_pop; i++) {
 			fitness = Fitness(population[i]);
-			averagefit += fitness;
+			//averagefit += fitness;
 
 			if (fitness == 0)
 				return i;
@@ -92,7 +103,7 @@ protected:
 		for (int i = 0; i < max_pop; i++) {
 			population[i].likelihood = last = last + ((1 / ((float)population[i].fitness) / multinv) * 100);
 		}
-	};	// Генерация вероятностей выживаемости
+	};	// Генерация вероятностей(коэффицентов) выживаемости
 
 	float MultInv() {
 		float sum = 0;
@@ -106,12 +117,12 @@ protected:
 
 	void CreateNewPopulation() {
 		gene temp_pop[max_pop];
-
+		
 		for (int i = 0; i < max_pop; i++) {
 			int parent1 = 0, parent2 = 0, iterations = 0;
-
-			if (rand() % 100 < 8) {
-				temp_pop[i] = mutation(population[GetIndex((float)i)]); //мутация данного гена с вероятность 0.08
+			
+			if (rand() % 100 < 8 && lastAvgFitness > avgFitness) {
+				temp_pop[i] = mutation(population[GetIndex((float)i)]); //мутация данного гена с вероятностью 0.08
 			}
 			else {
 				while (parent1 == parent2 || population[parent1].checkEquality(population[parent2])) {
@@ -126,8 +137,10 @@ protected:
 			}
 		}
 
+		lastAvgFitness = AvgFitness(population);
 		for (int i = 0; i < max_pop; i++)
 			population[i] = temp_pop[i];
+		avgFitness = AvgFitness(population);
 	};
 
 	int GetIndex(float value) {
