@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const int max_pop = 200;
+const int max_pop = 250;
 
 struct gene {
     int chromosomes[7], fitness;
@@ -31,7 +31,7 @@ public:
 		//генерация первого поколения
 		for (int i = 0; i < max_pop; i++) {
 			for (int j = 0; j < 7; j++) {
-				population[i].chromosomes[j] = rand() % (result + 1);
+				population[i].chromosomes[j] = rand() % (2 * (result + 1)) - (result + 1);
 			}
 		}
 
@@ -41,7 +41,7 @@ public:
 		}
 
 		int iterations = 0;// Запись итераций алгоритма
-		while (fitness != 0 || iterations < 50) {
+		while (fitness != 0 || iterations < 70) {
 			GenerateLikelihoods();// Вычисление вероятности выживаемости генов
 
 			CreateNewPopulation();// Создание новой популяции(поколения)
@@ -83,11 +83,9 @@ protected:
 	}// Функция вычисления fitness
 
 	int CreateFitnesses() {
-		//float averagefit = 0;
 		int fitness = 0;
 		for (int i = 0; i < max_pop; i++) {
 			fitness = Fitness(population[i]);
-			//averagefit += fitness;
 
 			if (fitness == 0)
 				return i;
@@ -121,13 +119,13 @@ protected:
 		for (int i = 0; i < max_pop; i++) {
 			int parent1 = 0, parent2 = 0, iterations = 0;
 			
-			if (rand() % 100 < 8 && lastAvgFitness > avgFitness) {
+			if (rand() % 100 < 8 && lastAvgFitness < avgFitness) {
 				temp_pop[i] = mutation(population[GetIndex((float)i)]); //мутация данного гена с вероятностью 0.08
 			}
 			else {
 				while (parent1 == parent2 || population[parent1].checkEquality(population[parent2])) {
-					parent1 = GetIndex((float)(rand() % 101));
-					parent2 = GetIndex((float)(rand() % 101));
+					parent1 = GetIndex((float)(rand() % 201 - 100));
+					parent2 = GetIndex((float)(rand() % 201 - 100));
 
 					if (++iterations > 25)
 						break;
@@ -153,10 +151,10 @@ protected:
 		}
 
 		return 7;
-	}; // Поиск гена в популяции по его значению
+	}; // Поиск гена в популяции по его вероятности выживания
 
 	gene mutation(gene& gn) {
-		gn.chromosomes[gn.chromosomes[rand() % 7]] = rand() % 100 + 1;
+		gn.chromosomes[gn.chromosomes[rand() % 7]] = rand() % 201 - 100;
 		return gn;
 	} // Функция мутации гена
 
@@ -174,7 +172,7 @@ protected:
 		for (int i = initial; i < final; i++) {// Скрещивание
 			child.chromosomes[i] = population[parent2].chromosomes[i];
 			if (rand() % 101 < 8)
-				child.chromosomes[i] = rand() % (result + 1);
+				child.chromosomes[i] = rand() % (2 * (result + 1)) - (result + 1);
 		}
 
 		return child;
@@ -196,10 +194,10 @@ int main()
 		}
 		else if (ans != -1) {
 			gene gn = diop.GetGene(ans);
-			cout << "The solution for a + 2b + 3c + 4d + 5e + 6f + 7g = 60 is:\n " << "a= " << gn.chromosomes[0] << ".\n" <<
-				"b= " << gn.chromosomes[1] << ".\n" << "c= " << gn.chromosomes[2] << ".\n" <<
-				"d= " << gn.chromosomes[3] << ".\n" << "e= " << gn.chromosomes[4]
-				<< ".\n" << "f= " << gn.chromosomes[5] << ".\n" << "g= " << gn.chromosomes[6] << "." << endl;
+			cout << "The solution for a + 2b + 3c + 4d + 5e + 6f + 7g = 60 is: " << endl << "a = " << gn.chromosomes[0] << ".\n" <<
+				"b = " << gn.chromosomes[1] << ".\n" << "c = " << gn.chromosomes[2] << ".\n" <<
+				"d = " << gn.chromosomes[3] << ".\n" << "e = " << gn.chromosomes[4]
+				<< ".\n" << "f = " << gn.chromosomes[5] << ".\n" << "g = " << gn.chromosomes[6] << "." << endl;
 			break;
 		}
 	}
